@@ -16,7 +16,7 @@ import (
 )
 
 func SignUp(c *gin.Context) {
-	// Note : hand user creation with same email ( tho email is set to be unique in db)
+	// Note : handle user creation with same email ( tho email is set to be unique in db)
 	// get the email and password
 	var body struct {
 		Email    string
