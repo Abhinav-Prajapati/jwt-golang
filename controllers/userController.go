@@ -39,3 +39,31 @@ func SignUp(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"id": user_uuid})
 
 }
+
+func Signin(c *gin.Context) {
+
+	var body struct {
+		Email    string
+		Password string
+	}
+	// get request body
+	c.Bind(&body)
+
+	var user models.User
+	// find user and store it row data to user struct
+	initializers.DB.First(&user, "email = ?", body.Email)
+
+	if user.ID == uuid.Nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid email id ",
+		})
+		return
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"user": "incorrect password"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"user": "correct password"})
+	}
+}

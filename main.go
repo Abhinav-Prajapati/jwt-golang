@@ -20,5 +20,6 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 	routes.POST("/signup", controllers.SignUp)
+	routes.POST("/signin", controllers.Signin)
 	routes.Run("localhost:8080")
 }
