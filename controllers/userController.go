@@ -1,11 +1,16 @@
 package controllers
 
 import (
+	"fmt"
 	"go-jwt/initializers"
 	"go-jwt/models"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -60,10 +65,35 @@ func Signin(c *gin.Context) {
 		return
 	}
 
+	// Compare the hash
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"user": "incorrect password"})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"user": "correct password"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "incorrect password"})
+		return
 	}
+
+	// Generate jwt token
+	jwtExpTimeStr := os.Getenv("JWT_EXP_TIME")
+	jwtExpTimeInt, err := strconv.Atoi(jwtExpTimeStr)
+	if err != nil {
+		// Handle error if conversion fails
+		fmt.Println("Error converting JWT_EXP_TIME to integer:", err)
+		return
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Hour * time.Duration(jwtExpTimeInt)).Unix(),
+	})
+
+	// Sign json token with key
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+	if err != nil {
+		fmt.Println("jwt erro " + err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to generate jwt token"})
+		return
+	}
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", tokenString, 3600, "", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"token": tokenString}) // todo: return empty body. Remove token from here (kept here now for testing only)
 }
