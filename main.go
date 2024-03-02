@@ -18,4 +18,5 @@ func main() {
 func init() {
 	initializers.LoadEvnVariables()
 	initializers.ConnectToGb()
+	initializers.MigrateDB()
 }
