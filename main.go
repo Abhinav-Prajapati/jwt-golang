@@ -3,6 +3,7 @@ package main
 import (
 	"go-jwt/controllers"
 	"go-jwt/initializers"
+	"go-jwt/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,5 +22,6 @@ func main() {
 	})
 	routes.POST("/signup", controllers.SignUp)
 	routes.POST("/signin", controllers.Signin)
+	routes.GET("/validate", middleware.Middleware, controllers.Validate)
 	routes.Run("localhost:8080")
 }

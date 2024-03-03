@@ -42,7 +42,6 @@ func SignUp(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"id": user_uuid})
-
 }
 
 func Signin(c *gin.Context) {
@@ -96,4 +95,11 @@ func Signin(c *gin.Context) {
 	c.SetCookie("Authorization", tokenString, 3600, "", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{"token": tokenString}) // todo: return empty body. Remove token from here (kept here now for testing only)
+}
+
+// a test route to test protected routes
+func Validate(c *gin.Context) {
+	user, _ := c.Get("user")
+	email := user.(models.User).Email
+	c.JSON(http.StatusOK, gin.H{"email": email})
 }
